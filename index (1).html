@@ -272,4 +272,214 @@
                     </div>
                     <div class="flex items-center space-x-4">
                         <svg class="icon" viewBox="0 0 24 24">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                        <div>
+                            <p class="font-semibold">Current Plan</p>
+                            <p id="currentPlan">-</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
+                            <line x1="12" y1="18" x2="12" y2="18"></line>
+                        </svg>
+                        <div>
+                            <p class="font-semibold">Connected Devices</p>
+                            <p id="connectedDevices">0 devices</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line>
+                            <line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line>
+                        </svg>
+                        <div>
+                            <p class="font-semibold">Plan Expiry Date</p>
+                            <p id="planExpiryDate">-</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <svg class="icon" viewBox="0 0 24 24">
+                            <circle cx="12" cy="8" r="7"></circle>
+                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
+                        </svg>
+                        <div>
+                            <p class="font-semibold">Accumulated Nebula Points</p>
+                            <p id="accumulatedPoints">0 points</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Stats Tab Content (Initially hidden) -->
+                <div id="statsContent" class="hidden">
+                    <div>
+                        <p class="font-semibold">Achievement Progress</p>
+                        <div class="progress-bar">
+                            <div class="progress-bar-fill" style="width: 75%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Games Completed</p>
+                        <p style="font-size: 1.5rem; font-weight: 700;">23</p>
+                    </div>
+                    <div>
+                        <p class="font-semibold">Favorite Genre</p>
+                        <p>Action-Adventure</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card-content">
+                <button id="logoutButton" class="button button-destructive">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Airtable
+        // IMPORTANT: Replace 'YOUR_AIRTABLE_API_KEY' and 'YOUR_AIRTABLE_BASE_ID' with your actual Airtable credentials
+        const base = new Airtable({apiKey: 'patitdiWx4iw4nk1G.f38bc73060de32912e9a73328236b57f3c2c9ef758fcf07abcfae6818a881610'}).base('YOUR_AIRTABLE_BASE_ID');
+
+        // DOM Elements
+        const loginView = document.getElementById('loginView');
+        const signupView = document.getElementById('signupView');
+        const profileView = document.getElementById('profileView');
+        const loginForm = document.getElementById('loginForm');
+        const signupForm = document.getElementById('signupForm');
+        const logoutButton = document.getElementById('logoutButton');
+        const showSignupLink = document.getElementById('showSignup');
+        const showLoginLink = document.getElementById('showLogin');
+
+        // Event Listeners
+        loginForm.addEventListener('submit', handleLogin);
+        signupForm.addEventListener('submit', handleSignup);
+        logoutButton.addEventListener('click', handleLogout);
+        showSignupLink.addEventListener('click', () => {
+            loginView.classList.add('hidden');
+            signupView.classList.remove('hidden');
+        });
+        showLoginLink.addEventListener('click', () => {
+            signupView.classList.add('hidden');
+            loginView.classList.remove('hidden');
+        });
+
+        // Handle Login
+        function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            base('Users').select({
+                filterByFormula: `AND({Email} = '${email}', {Password} = '${password}')`
+            }).firstPage((err, records) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                if (records.length > 0) {
+                    fetchUserData(email);
+                } else {
+                    alert('Invalid credentials');
+                }
+            });
+        }
+
+        // Handle Signup
+        function handleSignup(e) {
+            e.preventDefault();
+            const email = document.getElementById('signupEmail').value;
+            const password = document.getElementById('signupPassword').value;
+
+            base('Users').create([
+                {
+                    fields: {
+                        Email: email,
+                        Password: password,
+                        GamingHours: 0,
+                        AccumulatedPoints: 0,
+                        CurrentPlan: 'Basic',
+                        
+                        ConnectedDevices: 0,
+                        PlanExpiryDate: new Date().toISOString().split('T')[0]
+                    }
+                }
+            ], (err, records) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                alert('Sign up successful! Please log in.');
+                signupView.classList.add('hidden');
+                loginView.classList.remove('hidden');
+            });
+        }
+
+        // Fetch User Data
+        function fetchUserData(email) {
+            base('Users').select({
+                filterByFormula: `{Email} = '${email}'`
+            }).firstPage((err, records) => {
+                if (err) {
+                    console.error(err);
+                    return;
+                }
+                if (records.length > 0) {
+                    const userData = records[0].fields;
+                    updateProfileView(userData);
+                    showProfileView();
+                } else {
+                    showLoginView();
+                }
+            });
+        }
+
+        // Update Profile View
+        function updateProfileView(userData) {
+            document.getElementById('userEmail').textContent = userData.Email;
+            document.getElementById('playingTime').textContent = `${userData.GamingHours} hours`;
+            document.getElementById('playingTimeText').textContent = userData.GamingHours;
+            document.getElementById('playingTimeProgress').style.width = `${(userData.GamingHours / 1000) * 100}%`;
+            document.getElementById('currentPlan').textContent = userData.CurrentPlan;
+            document.getElementById('connectedDevices').textContent = `${userData.ConnectedDevices} devices`;
+            document.getElementById('planExpiryDate').textContent = userData.PlanExpiryDate;
+            document.getElementById('accumulatedPoints').textContent = `${userData.AccumulatedPoints} points`;
+        }
+
+        // Show Login View
+        function showLoginView() {
+            loginView.classList.remove('hidden');
+            signupView.classList.add('hidden');
+            profileView.classList.add('hidden');
+        }
+
+        // Show Profile View
+        function showProfileView() {
+            loginView.classList.add('hidden');
+            signupView.classList.add('hidden');
+            profileView.classList.remove('hidden');
+        }
+
+        // Handle Logout
+        function handleLogout() {
+            showLoginView();
+        }
+
+        // Tab Switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                if (this.dataset.tab === 'profile') {
+                    document.getElementById('profileContent').classList.remove('hidden');
+                    document.getElementById('statsContent').classList.add('hidden');
+                } else {
+                    document.getElementById('profileContent').classList.add('hidden');
+                    document.getElementById('statsContent').classList.remove('hidden');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
