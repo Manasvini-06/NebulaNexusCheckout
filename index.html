@@ -336,150 +336,153 @@
             </div>
         </div>
     </div>
+<script>
+    // Initialize Airtable
+    // IMPORTANT: Replace 'YOUR_AIRTABLE_API_KEY' and 'YOUR_AIRTABLE_BASE_ID' with your actual Airtable credentials
+    const base = new Airtable({apiKey: 'patitdiWx4iw4nk1G.f38bc73060de32912e9a73328236b57f3c2c9ef758fcf07abcfae6818a881610'}).base('apphbcqBCmyyk3GxZ');
 
-    <script>
-        // Initialize Airtable
-        // IMPORTANT: Replace 'YOUR_AIRTABLE_API_KEY' and 'YOUR_AIRTABLE_BASE_ID' with your actual Airtable credentials
-        const base = new Airtable({apiKey: 'patitdiWx4iw4nk1G.f38bc73060de32912e9a73328236b57f3c2c9ef758fcf07abcfae6818a881610'}).base('apphbcqBCmyyk3GxZ');
+    // DOM Elements
+    const loginView = document.getElementById('loginView');
+    const signupView = document.getElementById('signupView');
+    const profileView = document.getElementById('profileView');
+    const loginForm = document.getElementById('loginForm');
+    const signupForm = document.getElementById('signupForm');
+    const logoutButton = document.getElementById('logoutButton');
+    const showSignupLink = document.getElementById('showSignup');
+    const showLoginLink = document.getElementById('showLogin');
 
-        // DOM Elements
-        const loginView = document.getElementById('loginView');
-        const signupView = document.getElementById('signupView');
-        const profileView = document.getElementById('profileView');
-        const loginForm = document.getElementById('loginForm');
-        const signupForm = document.getElementById('signupForm');
-        const logoutButton = document.getElementById('logoutButton');
-        const showSignupLink = document.getElementById('showSignup');
-        const showLoginLink = document.getElementById('showLogin');
+    // Event Listeners
+    loginForm.addEventListener('submit', handleLogin);
+    signupForm.addEventListener('submit', handleSignup);
+    logoutButton.addEventListener('click', handleLogout);
+    showSignupLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        loginView.classList.add('hidden');
+        signupView.classList.remove('hidden');
+    });
+    showLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        signupView.classList.add('hidden');
+        loginView.classList.remove('hidden');
+    });
 
-        // Event Listeners
-        loginForm.addEventListener('submit', handleLogin);
-        signupForm.addEventListener('submit', handleSignup);
-        logoutButton.addEventListener('click', handleLogout);
-        showSignupLink.addEventListener('click', () => {
-            loginView.classList.add('hidden');
-            signupView.classList.remove('hidden');
+    // Handle Login
+    function handleLogin(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        // Check if user exists in Airtable
+        base('Users').select({
+            filterByFormula: `AND({Email} = '${email}', {Password} = '${password}')`
+        }).firstPage((err, records) => {
+            if (err) {
+                console.error('Airtable error:', err);
+                return;
+            }
+            if (records.length > 0) {
+                // User found, fetch and display their data
+                fetchUserData(email);
+            } else {
+                alert('Invalid credentials');
+            }
         });
-        showLoginLink.addEventListener('click', () => {
+    }
+
+    // Handle Signup
+    function handleSignup(e) {
+        e.preventDefault();
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+
+        // Create new user in Airtable
+        base('Users').create([
+            {
+                fields: {
+                    Email: email,
+                    Password: password,
+                    GamingHours: 0,
+                    AccumulatedPoints: 0,
+                    CurrentPlan: 'Basic',
+                    ConnectedDevices: 0,
+                    PlanExpiryDate: new Date().toISOString().split('T')[0]
+                }
+            }
+        ], (err, records) => {
+            if (err) {
+                console.error('Airtable error:', err);
+                return;
+            }
+            alert('Sign up successful! Please log in.');
             signupView.classList.add('hidden');
             loginView.classList.remove('hidden');
         });
+    }
 
-        // Handle Login
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            base('Users').select({
-                filterByFormula: `AND({Email} = '${email}', {Password} = '${password}')`
-            }).firstPage((err, records) => {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                if (records.length > 0) {
-                    fetchUserData(email);
-                } else {
-                    alert('Invalid credentials');
-                }
-            });
-        }
-
-        // Handle Signup
-        function handleSignup(e) {
-            e.preventDefault();
-            const email = document.getElementById('signupEmail').value;
-            const password = document.getElementById('signupPassword').value;
-
-            base('Users').create([
-                {
-                    fields: {
-                        Email: email,
-                        Password: password,
-                        GamingHours: 0,
-                        AccumulatedPoints: 0,
-                        CurrentPlan: 'Basic',
-                        
-                        ConnectedDevices: 0,
-                        PlanExpiryDate: new Date().toISOString().split('T')[0]
-                    }
-                }
-            ], (err, records) => {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                alert('Sign up successful! Please log in.');
-                signupView.classList.add('hidden');
-                loginView.classList.remove('hidden');
-            });
-        }
-
-        // Fetch User Data
-        function fetchUserData(email) {
-            base('Users').select({
-                filterByFormula: `{Email} = '${email}'`
-            }).firstPage((err, records) => {
-                if (err) {
-                    console.error(err);
-                    return;
-                }
-                if (records.length > 0) {
-                    const userData = records[0].fields;
-                    updateProfileView(userData);
-                    showProfileView();
-                } else {
-                    showLoginView();
-                }
-            });
-        }
-
-        // Update Profile View
-        function updateProfileView(userData) {
-            document.getElementById('userEmail').textContent = userData.Email;
-            document.getElementById('playingTime').textContent = `${userData.GamingHours} hours`;
-            document.getElementById('playingTimeText').textContent = userData.GamingHours;
-            document.getElementById('playingTimeProgress').style.width = `${(userData.GamingHours / 1000) * 100}%`;
-            document.getElementById('currentPlan').textContent = userData.CurrentPlan;
-            document.getElementById('connectedDevices').textContent = `${userData.ConnectedDevices} devices`;
-            document.getElementById('planExpiryDate').textContent = userData.PlanExpiryDate;
-            document.getElementById('accumulatedPoints').textContent = `${userData.AccumulatedPoints} points`;
-        }
-
-        // Show Login View
-        function showLoginView() {
-            loginView.classList.remove('hidden');
-            signupView.classList.add('hidden');
-            profileView.classList.add('hidden');
-        }
-
-        // Show Profile View
-        function showProfileView() {
-            loginView.classList.add('hidden');
-            signupView.classList.add('hidden');
-            profileView.classList.remove('hidden');
-        }
-
-        // Handle Logout
-        function handleLogout() {
-            showLoginView();
-        }
-
-        // Tab Switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                if (this.dataset.tab === 'profile') {
-                    document.getElementById('profileContent').classList.remove('hidden');
-                    document.getElementById('statsContent').classList.add('hidden');
-                } else {
-                    document.getElementById('profileContent').classList.add('hidden');
-                    document.getElementById('statsContent').classList.remove('hidden');
-                }
-            });
+    // Fetch User Data from Airtable
+    function fetchUserData(email) {
+        base('Users').select({
+            filterByFormula: `{Email} = '${email}'`
+        }).firstPage((err, records) => {
+            if (err) {
+                console.error('Airtable error:', err);
+                return;
+            }
+            if (records.length > 0) {
+                const userData = records[0].fields;
+                updateProfileView(userData);
+                showProfileView();
+            } else {
+                showLoginView();
+            }
         });
-    </script>
+    }
+
+    // Update Profile View with user data
+    function updateProfileView(userData) {
+        document.getElementById('userEmail').textContent = userData.Email;
+        document.getElementById('playingTime').textContent = `${userData.GamingHours} hours`;
+        document.getElementById('playingTimeText').textContent = userData.GamingHours;
+        document.getElementById('playingTimeProgress').style.width = `${(userData.GamingHours / 1000) * 100}%`;
+        document.getElementById('currentPlan').textContent = userData.CurrentPlan;
+        document.getElementById('connectedDevices').textContent = `${userData.ConnectedDevices} devices`;
+        document.getElementById('planExpiryDate').textContent = userData.PlanExpiryDate;
+        document.getElementById('accumulatedPoints').textContent = `${userData.AccumuledPoints} points`;
+    }
+
+    // Show Login View
+    function showLoginView() {
+        loginView.classList.remove('hidden');
+        signupView.classList.add('hidden');
+        profileView.classList.add('hidden');
+    }
+
+    // Show Profile View
+    function showProfileView() {
+        loginView.classList.add('hidden');
+        signupView.classList.add('hidden');
+        profileView.classList.remove('hidden');
+    }
+
+    // Handle Logout
+    function handleLogout() {
+        showLoginView();
+    }
+
+    // Tab Switching in Profile View
+    document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', function() {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            if (this.dataset.tab === 'profile') {
+                document.getElementById('profileContent').classList.remove('hidden');
+                document.getElementById('statsContent').classList.add('hidden');
+            } else {
+                document.getElementById('profileContent').classList.add('hidden');
+                document.getElementById('statsContent').classList.remove('hidden');
+            }
+        });
+    });
+</script>
 </body>
 </html>
