@@ -399,7 +399,7 @@
         function calculateTotal() {
             const expiryDate = new Date(document.getElementById('expiryDate').value);
             const today = new Date();
-            const monthsDiff = (expiryDate.getFullYear() -   today.getFullYear()) * 12 + expiryDate.getMonth() - today.getMonth();
+            const monthsDiff = (expiryDate.getFullYear() - today.getFullYear()) * 12 +    expiryDate.getMonth() - today.getMonth();
 
             if (isNaN(monthsDiff) || monthsDiff <= 0) {
                 document.getElementById('totalValue').textContent = '0';
@@ -434,7 +434,7 @@
             };
 
             try {
-                const response = await fetch('https://hooks.zapier.com/hooks/catch/9152579/21qqddf/', {
+                const response = await fetch('https://hook.us2.make.com/y7cqmvup5fylkzmt99849ylui77ucek4', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
