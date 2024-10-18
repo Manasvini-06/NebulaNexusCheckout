@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nebula Cloud Gaming</title>
-    <script src="https://cdn.jsdelivr.net/npm/airtable@0.11.4/build/airtable.browser.js"></script>
+    <title>Nebula Nexus Checkout</title>
+    <script src="https://apis.google.com/js/api.js"></script>
     <style>
         :root {
             --background: #000000;
@@ -32,20 +32,11 @@
             color: var(--foreground);
             line-height: 1.5;
             padding: 1rem;
-            margin: 0;
         }
 
         .container {
-            max-width: 64rem;
+            max-width: 600px;
             margin: 0 auto;
-        }
-
-        h1 {
-            font-size: 2.25rem;
-            font-weight: 700;
-            margin-bottom: 1.5rem;
-            text-align: center;
-            color: var(--primary);
         }
 
         .card {
@@ -53,19 +44,17 @@
             border: 1px solid var(--border);
             border-radius: 0.5rem;
             overflow: hidden;
-            margin-bottom: 1rem;
+            margin-top: 2rem;
         }
 
         .card-header {
             padding: 1.5rem;
-            border-bottom: 1px solid var(--border);
         }
 
         .card-title {
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
-            color: var(--primary);
         }
 
         .card-description {
@@ -83,7 +72,6 @@
         label {
             display: block;
             margin-bottom: 0.5rem;
-            color: var(--foreground);
         }
 
         .input {
@@ -93,7 +81,6 @@
             border: 1px solid var(--border);
             border-radius: 0.25rem;
             color: var(--foreground);
-            font-size: 1rem;
         }
 
         .button {
@@ -107,8 +94,6 @@
             font-weight: 500;
             text-align: center;
             text-decoration: none;
-            font-size: 1rem;
-            transition: background-color 0.2s;
         }
 
         .button:hover {
@@ -123,371 +108,395 @@
             background-color: #b91c1c;
         }
 
-        .tabs {
-            display: flex;
-            border-bottom: 1px solid var(--border);
-            margin-bottom: 1rem;
-        }
-
-        .tab {
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            color: var(--muted-foreground);
-            transition: color 0.2s, border-color 0.2s;
-        }
-
-        .tab:hover {
-            color: var(--foreground);
-        }
-
-        .tab.active {
-            border-bottom-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .flex {
-            display: flex;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .space-x-4 > * + * {
-            margin-left: 1rem;
-        }
-
-        .icon {
-            width: 1.5rem;
-            height: 1.5rem;
-            fill: none;
-            stroke: currentColor;
-            stroke-width: 2;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 0.5rem;
-            background-color: var(--secondary);
-            border-radius: 0.25rem;
-            overflow: hidden;
+        .error-message {
+            color: var(--destructive);
             margin-top: 0.5rem;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            background-color: var(--primary);
-            transition: width 0.3s ease;
         }
 
         .hidden {
             display: none;
         }
 
-        @media (min-width: 640px) {
-            .card-content {
-                padding: 2rem;
-            }
+        .plan-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .plan-option {
+            border: 2px solid var(--border);
+            padding: 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .plan-option:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .plan-option.selected {
+            border-color: var(--primary);
+            background-color: var(--accent);
+        }
+
+        .add-on {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem;
+            border: 1px solid var(--border);
+            border-radius: 0.25rem;
+        }
+
+        .total {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-top: 1rem;
+            color: var(--primary);
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-control button {
+            width: 30px;
+            height: 30px;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .quantity-control span {
+            margin: 0 0.5rem;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Nebula Cloud Gaming</h1>
-
-        <!-- Login View -->
-        <div class="card" id="loginView">
+        <div id="loginView" class="card">
             <div class="card-header">
-                <h2 class="card-title">Login to Your Nebula Nexus Account</h2>
-                <p class="card-description">Enter your credentials to access your gaming profile</p>
+                <h2 class="card-title">Nebula Nexus Checkout</h2>
+                <p class="card-description">Login to your account</p>
             </div>
             <div class="card-content">
                 <form id="loginForm">
                     <div class="form-group">
-                        <label for="loginEmail">Email</label>
-                        <input id="loginEmail" type="email" required class="input">
+                        <label for="email">Email</label>
+                        <input id="email" type="email" required class="input">
                     </div>
                     <div class="form-group">
-                        <label for="loginPassword">Password</label>
-                        <input id="loginPassword" type="password" required class="input">
+                        <label for="password">Password</label>
+                        <input id="password" type="password" required class="input">
                     </div>
                     <button type="submit" class="button">Login</button>
                 </form>
-                <p>Don't have an account? <a href="#" id="showSignup">Sign up</a></p>
+                <p id="errorMessage" class="error-message"></p>
             </div>
         </div>
 
-        <!-- Sign Up View -->
-        <div class="card hidden" id="signupView">
+        <div id="checkoutPage" class="card hidden">
             <div class="card-header">
-                <h2 class="card-title">Sign Up for Nebula Nexus</h2>
-                <p class="card-description">Create your gaming profile</p>
+                <h2 class="card-title">Checkout</h2>
+                <p class="card-description">Select your plan and add-ons</p>
             </div>
             <div class="card-content">
-                <form id="signupForm">
-                    <div class="form-group">
-                        <label for="signupEmail">Email</label>
-                        <input id="signupEmail" type="email" required class="input">
-                    </div>
-                    <div class="form-group">
-                        <label for="signupPassword">Password</label>
-                        <input id="signupPassword" type="password" required class="input">
-                    </div>
-                    <button type="submit" class="button">Sign Up</button>
-                </form>
-                <p>Already have an account? <a href="#" id="showLogin">Login</a></p>
+                <div id="userInfo"></div>
+                <h3>Select Your Plan</h3>
+                <div class="plan-options" id="planOptions"></div>
+                <h3>Add-Ons</h3>
+                <div id="addOns"></div>
+                <h3>Select Expiry Date</h3>
+                <input type="date" id="expiryDate" class="input">
+                <p class="total">Total: $<span id="totalValue">0</span></p>
+                <button onclick="handleCheckout()" class="button">Complete Checkout</button>
             </div>
         </div>
 
-        <!-- Profile View (Initially hidden, shown after login) -->
-        <div class="card hidden" id="profileView">
+        <div id="thankYouPage" class="card hidden">
             <div class="card-header">
-                <h2 class="card-title">Welcome back, <span id="userEmail"></span>!</h2>
-                <p class="card-description">Here's your Nebula Cloud Gaming profile</p>
+                <h2 class="card-title">Thank You!</h2>
+                <p class="card-description">Your order has been successfully processed.</p>
             </div>
             <div class="card-content">
-                <div class="tabs">
-                    <div class="tab active" data-tab="profile">Profile</div>
-                    <div class="tab" data-tab="stats">Stats</div>
-                </div>
-
-                <!-- Profile Tab Content -->
-                <div id="profileContent">
-                    <div class="flex items-center space-x-4">
-                        <svg class="icon" viewBox="0 0 24 24">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <polyline points="12 6 12 12 16 14"></polyline>
-                        </svg>
-                        <div>
-                            <p class="font-semibold">Playing Time</p>
-                            <p id="playingTime">0 hours</p>
-                            <div class="progress-bar">
-                                <div class="progress-bar-fill" id="playingTimeProgress" style="width: 0%;"></div>
-                            </div>
-                            <p class="card-description"><span id="playingTimeText">0</span> / 1000 hours</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <svg class="icon" viewBox="0 0 24 24">
-                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                        </svg>
-                        <div>
-                            <p class="font-semibold">Current Plan</p>
-                            <p id="currentPlan">-</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <svg class="icon" viewBox="0 0 24 24">
-                            <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                            <line x1="12" y1="18" x2="12" y2="18"></line>
-                        </svg>
-                        <div>
-                            <p class="font-semibold">Connected Devices</p>
-                            <p id="connectedDevices">0 devices</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <svg class="icon" viewBox="0 0 24 24">
-                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="16" y1="2" x2="16" y2="6"></line>
-                            <line x1="8" y1="2" x2="8" y2="6"></line>
-                            <line x1="3" y1="10" x2="21" y2="10"></line>
-                        </svg>
-                        <div>
-                            <p class="font-semibold">Plan Expiry Date</p>
-                            <p id="planExpiryDate">-</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center space-x-4">
-                        <svg class="icon" viewBox="0 0 24 24">
-                            <circle cx="12" cy="8" r="7"></circle>
-                            <polyline points="8.21 13.89 7 23 12 20 17 23 15.79 13.88"></polyline>
-                        </svg>
-                        <div>
-                            <p class="font-semibold">Accumulated Nebula Points</p>
-                            <p id="accumulatedPoints">0 points</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Stats Tab Content (Initially hidden) -->
-                <div id="statsContent" class="hidden">
-                    <div>
-                        <p class="font-semibold">Achievement Progress</p>
-                        <div class="progress-bar">
-                            <div class="progress-bar-fill" style="width: 75%;"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <p class="font-semibold">Games Completed</p>
-                        <p style="font-size: 1.5rem; font-weight: 700;">23</p>
-                    </div>
-                    <div>
-                        <p class="font-semibold">Favorite Genre</p>
-                        <p>Action-Adventure</p>
-                    </div>
-                </div>
-            </div>
-            <div class="card-content">
-                <button id="logoutButton" class="button button-destructive">Logout</button>
+                <p>Order details:</p>
+                <div id="orderSummary"></div>
+                <button onclick="window.location.reload()" class="button">Return to Home</button>
             </div>
         </div>
     </div>
 
     <script>
-        // Check if Airtable is loaded
-        if (typeof Airtable === 'undefined') {
-            console.error('Airtable library is not loaded. Please check your internet connection and try again.');
-        } else {
-            console.log('Airtable library loaded successfully');
+        // Replace these with your actual Google API credentials
+        const CLIENT_ID = '114789546787-oue24t0frjinu2po7bqoujhecdv0d0ei.apps.googleusercontent.com';
+        const API_KEY = 'AIzaSyD85w1ViEGjDduPug-Q_ls0hGX5jx_9g3M';
+        const SHEET_ID = '1bBTyAlZM47BESezOnPSbk3UcvK2SawuuTZewrTzAOZw';
+        const DISCOVERY_DOC = 'https://sheets.googleapis.com/$discovery/rest?version=v4';
+        const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+
+        let gapiInited = false;
+        let gisInited = false;
+        let tokenClient;
+
+        let userData = null;
+        let selectedPlan = null;
+        let selectedAddOns = {};
+
+        const plans = [
+            { name: 'Core', playingTime: 150, connectedDevices: 1, price: 1000 },
+            { name: 'Standard', playingTime: 250, connectedDevices: 5, price: 2000 },
+            { name: 'Ultimate', playingTime: 500, connectedDevices: 10, price: 5000 },
+        ];
+
+        const addOns = [
+            { name: 'Gaming Hours', price: 100, description: '50hr x 1', allowMultiple: true },
+            { name: '4k Vision', price: 250, description: '', allowMultiple: false },
+            { name: 'Additional Devices', price: 250, description: 'x 1', allowMultiple: true },
+            { name: 'NCP Purchase', price: 20, description: 'x 1', allowMultiple: true },
+        ];
+
+        document.addEventListener('DOMContentLoaded', initializeGoogleAPI);
+
+        function initializeGoogleAPI() {
+            gapi.load('client', initClient);
         }
 
-        // Initialize Airtable
-        // IMPORTANT: Replace 'YOUR_AIRTABLE_API_KEY' and 'YOUR_AIRTABLE_BASE_ID' with your actual Airtable credentials
-        const base = new Airtable({apiKey: 'patitdiWx4iw4nk1G.f38bc73060de32912e9a73328236b57f3c2c9ef758fcf07abcfae6818a881610'}).base('apphbcqBCmyyk3GxZ');
+        async function initClient() {
+            try {
+                await gapi.client.init({
+                    apiKey: API_KEY,
+                    discoveryDocs: [DISCOVERY_DOC],
+                });
+                gapiInited = true;
+                maybeEnableButtons();
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = 'Failed to initialize Google API. Please try again later.';
+            }
+        }
 
-        // DOM Elements
-        const loginView = document.getElementById('loginView');
-        const signupView = document.getElementById('signupView');
-        const profileView = document.getElementById('profileView');
-        const loginForm = document.getElementById('loginForm');
-        const signupForm = document.getElementById('signupForm');
-        const logoutButton = document.getElementById('logoutButton');
-        const showSignupLink = document.getElementById('showSignup');
-        const showLoginLink = document.getElementById('showLogin');
+        function maybeEnableButtons() {
+            if (gapiInited) {
+                document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            }
+        }
 
-        // Event Listeners
-        loginForm.addEventListener('submit', handleLogin);
-        signupForm.addEventListener('submit', handleSignup);
-        logoutButton.addEventListener('click', handleLogout);
-        showSignupLink.addEventListener('click', (e) => {
+        async function handleLogin(e) {
             e.preventDefault();
-            loginView.classList.add('hidden');
-            signupView.classList.remove('hidden');
-        });
-        showLoginLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            signupView.classList.add('hidden');
-            loginView.classList.remove('hidden');
-        });
-
-        // Handle Login
-        function handleLogin(e) {
-            e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-
-            base('Users').select({
-                filterByFormula: `AND({Email} = '${email}', {Password} = '${password}')`
-            }).firstPage((err, records) => {
-                if (err) {
-                    console.error('Airtable error:', err);
-                    return;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            if (!email || !password) {
+                document.getElementById('errorMessage').textContent = 'Please enter both email and password';
+                return;
+            }
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: SHEET_ID,
+                    range: 'Sheet1!A1:I100',
+                });
+                const rows = response.result.values;
+                if (!rows || rows.length === 0) {
+                    throw new Error('No data found in the spreadsheet');
                 }
-                if (records.length > 0) {
-                    fetchUserData(email);
+                const userRow = rows.find(row => row[0] === email && row[8] === password);
+                if (userRow) {
+                    userData = {
+                        email: userRow[0],
+                        mobile: userRow[1],
+                        gamingHours: userRow[2],
+                        connectedDevices: userRow[3],
+                        activePlans: userRow[4],
+                        accumulatedPoints: userRow[5],
+                        expiryDate: userRow[6],
+                        addOn: userRow[7],
+                    };
+                    document.getElementById('loginView').classList.add('hidden');
+                    document.getElementById('checkoutPage').classList.remove('hidden');
+                    displayCheckoutPage();
                 } else {
-                    alert('Invalid credentials');
+                    document.getElementById('errorMessage').textContent = 'Invalid email or password';
                 }
+            } catch (error) {
+                document.getElementById('errorMessage').textContent = `Login failed: ${error.message}`;
+            }
+        }
+
+        function displayCheckoutPage() {
+            document.getElementById('userInfo').innerHTML = `
+                <p><strong>Email:</strong> ${userData.email}</p>
+                <p><strong>Current Plan:</strong> ${userData.activePlans}</p>
+                <p><strong>Current Expiry Date:</strong> ${userData.expiryDate}</p>
+            `;
+
+            const planOptionsElement = document.getElementById('planOptions');
+            planOptionsElement.innerHTML = plans.map(plan => `
+                <div class="plan-option" onclick="selectPlan('${plan.name}')">
+                    <h3>${plan.name}</h3>
+                    <p>$${plan.price} / month</p>
+                    <p>Playing Time: ${plan.playingTime} hrs</p>
+                    <p>Connected Devices: ${plan.connectedDevices}</p>
+                </div>
+            `).join('');
+
+            const addOnsElement = document.getElementById('addOns');
+            addOnsElement.innerHTML = addOns.map(addOn => `
+                <div class="add-on">
+                    <label>
+                        <input type="checkbox" onchange="toggleAddOn('${addOn.name}')">
+                        ${addOn.name} - $${addOn.price} ${addOn.description}
+                    </label>
+                    ${addOn.allowMultiple ? `
+                        <div class="quantity-control">
+                            <button onclick="changeAddOnQuantity('${addOn.name}', -1)">-</button>
+                            <span id="${addOn.name}-quantity">0</span>
+                            <button onclick="changeAddOnQuantity('${addOn.name}', 1)">+</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+
+            const today = new Date();
+            const minDate = today.toISOString().split('T')[0];
+            const maxDate = new Date(today.setFullYear(today.getFullYear() + 1)).toISOString().split('T')[0];
+            document.getElementById('expiryDate').setAttribute('min', minDate);
+            document.getElementById('expiryDate').setAttribute('max', maxDate);
+            document.getElementById('expiryDate').addEventListener('change', calculateTotal);
+
+            selectPlan(userData.activePlans);
+        }
+
+        function selectPlan(planName) {
+            selectedPlan = plans.find(plan => plan.name === planName);
+            document.querySelectorAll('.plan-option').forEach(el => {
+                el.classList.toggle('selected', el.querySelector('h3').textContent === planName);
             });
+            calculateTotal();
         }
 
-        // Handle Signup
-        function handleSignup(e) {
-            e.preventDefault();
-            const email = document.getElementById('signupEmail').value;
-            const password =   document.getElementById('signupPassword').value;
+        function toggleAddOn(addOnName) {
+            if (selectedAddOns[addOnName]) {
+                delete selectedAddOns[addOnName];
+            } else {
+                selectedAddOns[addOnName] = 1;
+            }
+            calculateTotal();
+        }
 
-            base('Users').create([
-                {
-                    fields: {
-                        Email: email,
-                        Password: password,
-                        GamingHours: 0,
-                        AccumulatedPoints: 0,
-                        CurrentPlan: 'Basic',
-                        ConnectedDevices: 0,
-                        PlanExpiryDate: new Date().toISOString().split('T')[0]
-                    }
+        function changeAddOnQuantity(addOnName, change) {
+            selectedAddOns[addOnName] = (selectedAddOns[addOnName] || 0) + change;
+            if (selectedAddOns[addOnName] <= 0) {
+                delete selectedAddOns[addOnName];
+            }
+            document.getElementById(`${addOnName}-quantity`).textContent = selectedAddOns[addOnName] || 0;
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            const expiryDate = new Date(document.getElementById('expiryDate').value);
+            const today = new Date();
+            const monthsDiff = (expiryDate.getFullYear() - today.getFullYear()) * 12  + expiryDate.getMonth() - today.getMonth();
+
+            if (isNaN(monthsDiff) || monthsDiff <= 0) {
+                document.getElementById('totalValue').textContent = '0';
+                return;
+            }
+
+            const planTotal = selectedPlan ? selectedPlan.price * monthsDiff : 0;
+            const addOnTotal = Object.entries(selectedAddOns).reduce((total, [name, quantity]) => {
+                const addOn = addOns.find(a => a.name === name);
+                return total + (addOn ? addOn.price * quantity * monthsDiff : 0);
+            }, 0);
+
+            const total = planTotal + addOnTotal;
+            document.getElementById('totalValue').textContent = total.toFixed(2);
+        }
+
+        async function handleCheckout() {
+            const expiryDate = document.getElementById('expiryDate').value;
+            if (!selectedPlan || !expiryDate) {
+                alert('Please select a plan and expiry date.');
+                return;
+            }
+
+            const checkoutData = {
+                email: userData.email,
+                plan: selectedPlan.name,
+                gamingHours: selectedPlan.playingTime + (selectedAddOns['Gaming Hours'] ? selectedAddOns['Gaming Hours'] * 50 : 0),
+                connectedDevices: selectedPlan.connectedDevices + (selectedAddOns['Additional Devices'] || 0),
+                expiryDate: expiryDate,
+                addOns: Object.keys(selectedAddOns).join(';'),
+                totalValue: parseFloat(document.getElementById('totalValue').textContent)
+            };
+
+            try {
+                await updateUserData(checkoutData);
+                document.getElementById('checkoutPage').classList.add('hidden');
+                document.getElementById('thankYouPage').classList.remove('hidden');
+                displayThankYouPage(checkoutData);
+            } catch (error) {
+                alert('An error occurred during checkout. Please try again.');
+            }
+        }
+
+        async function updateUserData(data) {
+            try {
+                const response = await gapi.client.sheets.spreadsheets.values.get({
+                    spreadsheetId: SHEET_ID,
+                    range: 'A:A',
+                });
+
+                const rows = response.result.values;
+                const rowIndex = rows.findIndex(row => row[0] === data.email);
+
+                if (rowIndex === -1) {
+                    throw new Error('User not found');
                 }
-            ], (err, records) => {
-                if (err) {
-                    console.error('Airtable error:', err);
-                    return;
-                }
-                alert('Sign up successful! Please log in.');
-                signupView.classList.add('hidden');
-                loginView.classList.remove('hidden');
-            });
+
+                await gapi.client.sheets.spreadsheets.values.update({
+                    spreadsheetId: SHEET_ID,
+                    range: `C${rowIndex + 1}:M${rowIndex + 1}`,
+                    valueInputOption: 'USER_ENTERED',
+                    resource: {
+                        values: [[
+                            data.gamingHours,
+                            data.connectedDevices,
+                            data.plan,
+                            '',
+                            data.expiryDate,
+                            data.addOns,
+                            '',
+                            '',
+                            '',
+                            '',
+                            data.totalValue
+                        ]],
+                    },
+                });
+                return true;
+            } catch (error) {
+                console.error('Error updating user data:', error);
+                throw error;
+            }
         }
 
-        // Fetch User Data
-        function fetchUserData(email) {
-            base('Users').select({
-                filterByFormula: `{Email} = '${email}'`
-            }).firstPage((err, records) => {
-                if (err) {
-                    console.error('Airtable error:', err);
-                    return;
-                }
-                if (records.length > 0) {
-                    const userData = records[0].fields;
-                    updateProfileView(userData);
-                    showProfileView();
-                } else {
-                    showLoginView();
-                }
-            });
+        function displayThankYouPage(orderData) {
+            const orderSummary = document.getElementById('orderSummary');
+            orderSummary.innerHTML = `
+                <p><strong>Plan:</strong> ${orderData.plan}</p>
+                <p><strong>Gaming Hours:</strong> ${orderData.gamingHours}</p>
+                <p><strong>Connected Devices:</strong> ${orderData.connectedDevices}</p>
+                <p><strong>Expiry Date:</strong> ${orderData.expiryDate}</p>
+                <p><strong>Add-Ons:</strong> ${orderData.addOns || 'None'}</p>
+                <p><strong>Total Value:</strong> $${orderData.totalValue}</p>
+            `;
         }
 
-        // Update Profile View
-        function updateProfileView(userData) {
-            document.getElementById('userEmail').textContent = userData.Email;
-            document.getElementById('playingTime').textContent = `${userData.GamingHours} hours`;
-            document.getElementById('playingTimeText').textContent = userData.GamingHours;
-            document.getElementById('playingTimeProgress').style.width = `${(userData.GamingHours / 1000) * 100}%`;
-            document.getElementById('currentPlan').textContent = userData.CurrentPlan;
-            document.getElementById('connectedDevices').textContent = `${userData.ConnectedDevices} devices`;
-            document.getElementById('planExpiryDate').textContent = userData.PlanExpiryDate;
-            document.getElementById('accumulatedPoints').textContent = `${userData.AccumulatedPoints} points`;
-        }
-
-        // Show Login View
-        function showLoginView() {
-            loginView.classList.remove('hidden');
-            signupView.classList.add('hidden');
-            profileView.classList.add('hidden');
-        }
-
-        // Show Profile View
-        function showProfileView() {
-            loginView.classList.add('hidden');
-            signupView.classList.add('hidden');
-            profileView.classList.remove('hidden');
-        }
-
-        // Handle Logout
-        function handleLogout() {
-            showLoginView();
-        }
-
-        // Tab Switching
-        document.querySelectorAll('.tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                this.classList.add('active');
-                if (this.dataset.tab === 'profile') {
-                    document.getElementById('profileContent').classList.remove('hidden');
-                    document.getElementById('statsContent').classList.add('hidden');
-                } else {
-                    document.getElementById('profileContent').classList.add('hidden');
-                    document.getElementById('statsContent').classList.remove('hidden');
-                }
-            });
-        });
+        gapi.load('client', initClient);
     </script>
 </body>
 </html>
