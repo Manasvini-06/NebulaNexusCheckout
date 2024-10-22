@@ -429,6 +429,16 @@ chat='true'>
                 return;
             }
 
+    // Associate visitor with email
+     FM.associateVisitor(userData.email);
+ 
+     // Track custom event
+     FM.trackCustomEvent("Checkout completed", {
+         "email": userData.email,
+         "Plan": selectedPlan.name,
+         "Add ons": Object.keys(selectedAddOns).join(';')
+     });
+
             const checkoutData = {
                 email: userData.email,
                 plan: selectedPlan.name,
