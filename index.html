@@ -439,6 +439,27 @@ chat='true'>
          "Add ons": Object.keys(selectedAddOns).join(';')
      });
 
+    const addOnPrices = {
+        'Gaming Hours': 100,
+        '4k Vision': 250,
+        'Additional Devices': 250,
+        'NCP Purchase': 20
+    };
+
+    // Calculate add-on values based on quantity purchased
+    const gamingHoursAddOnValue = selectedAddOns['Gaming Hours'] ? selectedAddOns['Gaming Hours'] * addOnPrices['Gaming Hours'] : 0;
+    const visionAddOnValue = selectedAddOns['4k Vision'] ? addOnPrices['4k Vision'] : 0;
+    const additionalDevicesAddOnValue = selectedAddOns['Additional Devices'] ? selectedAddOns['Additional Devices'] * addOnPrices['Additional Devices'] : 0;
+    const ncpPurchaseAddOnValue = selectedAddOns['NCP Purchase'] ? selectedAddOns['NCP Purchase'] * addOnPrices['NCP Purchase'] : 0;
+
+    // Log add-on values for verification
+    console.log('Add-on Values:', {
+        gamingHoursAddOnValue,
+        visionAddOnValue,
+        additionalDevicesAddOnValue,
+        ncpPurchaseAddOnValue
+    });
+
             const checkoutData = {
                 email: userData.email,
                 plan: selectedPlan.name,
@@ -447,6 +468,10 @@ chat='true'>
                 expiryDate: expiryDate,
                 addOns: Object.keys(selectedAddOns).join(';'),
                 totalValue: parseFloat(document.getElementById('totalValue').textContent)
+                 gamingHoursAddOnValue,
+                 visionAddOnValue,
+                 additionalDevicesAddOnValue,
+                ncpPurchaseAddOnValue
             };
 
             try {
