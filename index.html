@@ -472,7 +472,10 @@ chat='true'>
                 connectedDevices: selectedPlan.connectedDevices + (selectedAddOns['Additional Devices'] || 0),
                 expiryDate: expiryDate,
                 addOns: Object.keys(selectedAddOns).join(';'),
-                totalValue: parseFloat(document.getElementById('totalValue').textContent)
+                totalValue: parseFloat(document.getElementById('totalValue').textContent),
+                subscriptionPlanAmount: planAmount,
+                billingCycleMonths: monthsDiff,
+                ...addOnAmounts
         
             };
 
