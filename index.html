@@ -424,10 +424,27 @@ chat='true'>
 
         async function handleCheckout() {
             const expiryDate = document.getElementById('expiryDate').value;
+    
             if (!selectedPlan || !expiryDate) {
                 alert('Please select a plan and expiry date.');
                 return;
             }
+
+        // Calculate billing cycle
+    const expiryDateObj = new Date(expiryDate);
+    const today = new Date();
+    const monthsDiff = (expiryDateObj.getFullYear() - today.getFullYear()) * 12 + 
+                       expiryDateObj.getMonth() - today.getMonth();
+
+    // Calculate the subscription plan amount
+    const planAmount = selectedPlan.price * monthsDiff;
+
+    // Calculate amounts for all add-ons separately
+    const addOnAmounts = {};
+    Object.entries(selectedAddOns).forEach(([name, quantity]) => {
+        const addOn = addOns.find(a => a.name === name);
+        addOnAmounts[`${name} amount`] = addOn.price * quantity * monthsDiff;
+    });
 
     // Associate visitor with email
      FM.associateVisitor(userData.email);
@@ -436,7 +453,10 @@ chat='true'>
      FM.trackCustomEvent("Checkout completed", {
          "email": userData.email,
          "Plan": selectedPlan.name,
-         "Add ons": Object.keys(selectedAddOns).join(';')
+         "Add ons": Object.keys(selectedAddOns).join(';'),
+         "Subscription plan amount": planAmount,
+        "Billing cycle (months)": monthsDiff,
+        ...addOnAmounts
      });
 
 
