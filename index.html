@@ -446,19 +446,24 @@ chat='true'>
         addOnAmounts[`${name} amount`] = addOn.price * quantity * monthsDiff;
     });
 
+     // Prepare event data
+    const eventData = {
+        "email": userData.email,
+        "Plan": selectedPlan.name,
+        "Add ons": Object.keys(selectedAddOns).join(';'),
+        "Subscription plan amount": planAmount,
+        "Billing cycle (months)": monthsDiff,
+        ...addOnAmounts
+    };
+
+    // Log event data for debugging
+    console.log("Custom event data:", eventData);
+
     // Associate visitor with email
      FM.associateVisitor(userData.email);
  
-     // Track custom event
-     FM.trackCustomEvent("Checkout completed", {
-         "email": userData.email,
-         "Plan": selectedPlan.name,
-         "Add ons": Object.keys(selectedAddOns).join(';'),
-         "Subscription plan amount": planAmount,
-        "Billing cycle (months)": monthsDiff,
-        ...addOnAmounts
-     });
-
+ // Track custom event with additional attributes
+    FM.trackCustomEvent("Checkout completed", eventData);
 
             const checkoutData = {
                 email: userData.email,
